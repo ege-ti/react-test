@@ -1,0 +1,34 @@
+name: Publish artifacts on AWS
+
+# Run publish pipeline only on main
+on:
+  push:
+    branches: [main]
+
+jobs:
+  publish-artifacts:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+      AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      AWS_ACCOUNT: ${{secrets.AWS_ACCOUNT}}
+      AWS_REGION: ${{secrets.AWS_REGION}}
+      AWS_BUCKET: ${{secrets.AWS_BUCKET}}
+      AWS_DISTRIBUTION_ID: ${{secrets.AWS_DISTRIBUTION_ID}}
+      AWS_STACK: ${{secrets.AWS_STACK}}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        name: Use Node.js 16
+        with:
+          node-version: '16.14.0'
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
+      - name: Deploy
+        run: |
+          chmod +x .github/scripts/deploy.sh
+          ./.github/scripts/deploy.sh
+        shell: bash
